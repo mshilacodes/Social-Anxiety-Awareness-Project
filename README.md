@@ -27,6 +27,12 @@ Our methodology involves comprehensive analysis of lifestyle factors including s
 - Model Interpretation 
 - Model Deployment
 
+
+### Feature Importances
+  Clearly shows the Random Forest model focuses on behavioral attributes(stress, sleep, caffeine) over physiological ones(HeartRate, BreathingRate).
+
+  ![feature importances](images/feature_importances.png)
+
   
 ## CONCLUSION 
 This project successfully demonstrates the potential of machine learning models—specifically ensemble methods like Random Forest and Gradient Boosting—in the early detection, risk prediction, and personalized recommendation of anxiety prevention strategies. 
