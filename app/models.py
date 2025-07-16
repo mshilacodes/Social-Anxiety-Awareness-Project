@@ -1,0 +1,46 @@
+from pydantic import BaseModel
+
+class InputData(BaseModel):
+    age: int
+    sleep_hours: float
+    physical_activity_hrs_week: float
+    caffeine_intake_mg_day: float
+    alcohol_consumption_drinks_week: float
+    stress_level_1_10: int
+    heart_rate_bpm: float
+    breathing_rate_breaths_min: float
+    sweating_level_1_5: int
+    therapy_sessions_per_month: int
+    diet_quality_1_10: int
+    gender_male: int
+    gender_other: int
+    occupation_athlete: int
+    occupation_chef: int
+    occupation_doctor: int
+    occupation_engineer: int
+    occupation_freelancer: int
+    occupation_lawyer: int
+    occupation_musician: int
+    occupation_nurse: int
+    occupation_other: int
+    occupation_scientist: int
+    occupation_student: int
+    occupation_teacher: int
+    smoking_yes: int
+    family_history_of_anxiety_yes: int
+    dizziness_yes: int
+    medication_yes: int
+    recent_major_life_event_yes: int
+    dataset_family: int
+
+class TopFeaturesInput(BaseModel):
+    stress_level_1_10: int
+    sleep_hours: float
+    caffeine_intake_mg_day: float
+    diet_quality_1_10: int
+    physical_activity_hrs_week: float
+    heart_rate_bpm: float
+    age: int
+    alcohol_consumption_drinks_week: float
+    breathing_rate_breaths_min: float
+    sweating_level_1_5: int
