@@ -1,3 +1,0 @@
-RandomForestRegressor Performance
-MSE: 1.0737
-R2 Score: 0.7668
