@@ -1,5 +1,5 @@
 streamlit
-google-ai-generativelanguage
+google-genai
 python-dotenv
 
 
