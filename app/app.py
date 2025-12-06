@@ -1,18 +1,17 @@
 import streamlit as st
 import google.genai as genai
 from google.genai.types import GenerateContentConfig
-import os
 from functions import get_secret
 
 
-st.set_page_config(page_title = "Leph Anxiety Support")
+st.set_page_config(page_title="Leph Anxiety Support", page_icon="💬")
 
 api_key = get_secret("API_KEY")
 client = genai.Client(api_key=api_key)
 
 def gemini_response(prompt):
     response = client.models.generate_content(
-        model = "gemini-2.0-flash",
+        model="gemini-2.0-flash",
         config=GenerateContentConfig(
             max_output_tokens=500,
         ),
@@ -20,141 +19,117 @@ def gemini_response(prompt):
     )
     return response.text
 
+ 
+ANXIETY_QUESTIONS = [
+    "Over the last 2 weeks, how often have you felt nervous, anxious, or on edge?",
+    "Over the last 2 weeks, how often were you unable to stop or control worrying?",
+    "How often have you worried too much about different things?",
+    "How often have you had trouble relaxing?",
+    "How often have you felt so restless that it was hard to sit still?",
+    "How often have you become easily annoyed or irritable?",
+    "How often have you felt afraid, as if something awful might happen?"
+]
 
+OPTIONS = ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+SCORES = {"Not at all": 0, "Several days": 1, "More than half the days": 2, "Nearly every day": 3}
+
+ 
+if "mode" not in st.session_state:
+    st.session_state.mode = "intro"   # intro → anxiety_test → chat
+if "question_index" not in st.session_state:
+    st.session_state.question_index = 0
+if "answers" not in st.session_state:
+    st.session_state.answers = []
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-if "mode" not in st.session_state:
+
+ 
+def restart():
     st.session_state.mode = "intro"
-
-if "anxiety_answers" not in st.session_state:
-    st.session_state.anxiety_answers = []
-
-if "current_question_index" not in st.session_state:
-    st.session_state.current_question_index = 0
-
-#Anxiety Questions
-ANXIETY_QUESTIONS =[
-"In the past week, how often have you felt nervous or on the edge? (0=never, 3=nearly everyday)",
-"How often have you been unable to stop or control worrying? (0-3)",
-"How often have you been restless? (0-3)",
-"How often have you felt easily irritated or annoyed? (0-3)",
-"How often have you felt afraid that something awful might happen? (0-3)"
-]
-#Auto Intro 
-
-if len(st.session_state.chat_history) == 0:
-    st.session_state.chat_history.append(("assistant",
-        "Hi there \nHow are you feeling today on a scale of  **1 to 10**?\n"
-        "(1= very low, 10 = feeling great)"
-                                          
-    ))
-    st.session_state.mode ="anxiety_scale"
+    st.session_state.question_index = 0
+    st.session_state.answers = []
+    st.session_state.chat_history = []
 
 
-for role,message in st.session_state.chat_history:
-    st.chat_message(role).write(message)
 
-#User Input
-user_message = st.chat_input("Type your message...")
+if st.session_state.mode == "intro":
 
+    st.title("💬 Leph Anxiety Support")
+    st.write("How are you feeling today?")
 
-if user_message:
-    st.chat_message("user").write(user_message)
-    st.session_state.chat_history.append(("user", user_message))
+    feeling = st.slider(
+        "Choose how you feel",
+        1, 10, 5,
+        help="1 = Very Low, 10 = Very High"
+    )
 
-    if st.session_state.mode == "anxiety_scale":
-        try: 
-            scale_value = int(user_message)
-            if 1 <= scale_value <= 10:
-                if scale_value <= 6:
-                    st.session_state.chat_history.append(("assistant",
-                        "Thank you for sharing"
-                        "I'd like to ask a few short questions to understand how you're feeling.\n\n"
-                        "Here's the first question: \n\n"
-                        f"{ANXIETY_QUESTIONS[0]}"
-                        
-                     ))
-                    st.session_state.mode = "chat"
-                else:
-                    st.session_state.chat_history.append(("assistant"
-                    "I'm glad you're feeling ok today! "
-                    "If you want to talk about anything or ask for support, I'm here"
-                    
-                    ))
-                    st.session_state.mode = "chat" 
-            else:
-                st.session_state.chat_history.append(("assistant", "Please choose a number between **1 and 10**"))
-        except:
-            st.session_state.chat_history.append(("assistant", "Please enter a number **4**, **7**, or **10**."))
-    
-    elif st.session_state.mode == "anxiety_questions":
-        try:
-            score = int(user_message)
-            if 0 <= score <= 3:
-                st.session_state.anxiety_answers.append(score)
-                st.session_state.current_question_index +=1
-
-                if st.session_stat.current_question_index < len(ANXIETY_QUESTIONS):
-                    next_q = ANXIETY_QUESTIONS[st.session_state.current_question_index]
-                    st.session_state.chat_history.append(("assistant", next_q))
-                else:
-                    total = sum(st.session_state.anxiety_answers)
-
-                    if total <= 4:
-                        level = "Minimal anxiety"
-                        suggestion = "Try light breathing exercises, short walks, or journaling."
-                    elif total<=9:
-                        level = "Mild anciety"
-                        suggestion = "Try gounding techniques like 5-4-3-2-1, warm tea, or mindful stretching." 
-                    elif total <=14:
-                        level = "Moderate anxiety"
-                        suggestion = "Consider longer mindfulness sessions, talking to a trusted friend, or structured routines."
-                    else:
-                        level = "Sever anxiety"
-                        suggestion = (
-                            "It may help you to talk to a mental health professional"
-                            "if you feel unsafe"
-                        )
-                    st.session_state.chat_history.append(("assistant",
-                        f"Your score **{total}**, which suggests **{level}**.\n\n"
-                        f"Here are some suppotive, non-medical suggestions: \n- {suggestion}\n\n"
-                        "You can now chat with me about anything you'd like"                                      
-                    ))
-
-                    st.session_state.mode="chat"
-        except:
-            st.session_state.chat_history.append(("assistant", "Please answer with a number from **0 to 3**."))
-    elif st.session_state.mode =="chat":
-
-        system_prompt = f""" 
-        You are are  friendly and a mental health nurse
-        Always suggest activities related to the problem they have shared.
-        If the user asks concerning questions, suggest nearest hospital
-        But if symptons are mild suggest activites user can do
-        """
-        
-        full_input = f"{system_prompt}\n\nUser message: \n\"\"\"{user_message}\"\"\""
-
-        context = [
-            *[
-                {"role":role, "parts":[{"text":msg}]} for role, msg in st.session_state.chat_history
-            ],
-            {"role": "user","parts":[{"text": full_input}]}
-        ]
+    if st.button("Continue"):
+        st.session_state.mode = "anxiety_test"
 
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=full_input
-        )
 
-       
+elif st.session_state.mode == "anxiety_test":
+
+    q_index = st.session_state.question_index
+    st.title("🧠 Anxiety Screening")
+
+    st.write(f"**Question {q_index+1} of {len(ANXIETY_QUESTIONS)}**")
+    st.write(ANXIETY_QUESTIONS[q_index])
+
+    choice = st.radio("Select an answer:", OPTIONS)
+
+    if st.button("Next"):
+        st.session_state.answers.append(choice)
+        st.session_state.question_index += 1
+
+        if st.session_state.question_index >= len(ANXIETY_QUESTIONS):
+            st.session_state.mode = "results"
 
 
-        assistant_reply = response.text
 
-        st.chat_message("assistant").write(assistant_reply)
-        st.session_state.chat_history.append(("assistant", assistant_reply))
+elif st.session_state.mode == "results":
+
+    total_score = sum(SCORES[a] for a in st.session_state.answers)
+
+    st.title("📊 Your Anxiety Assessment Results")
+    st.write(f"Your total score is **{total_score}**.")
+
+    # Get Gemini summary
+    summary_prompt = f"""
+    A user completed the GAD-7 anxiety questionnaire.
+    Total score: {total_score}.
+
+    Provide a supportive, friendly, 1-paragraph explanation 
+    of what their score might indicate, and gentle self-care suggestions.
+    Avoid medical claims or diagnosing.
+    """
+
+    result_text = gemini_response(summary_prompt)
+    st.write(result_text)
+
+    if st.button("Start Chatting"):
+        st.session_state.mode = "chat"
 
 
+elif st.session_state.mode == "chat":
+
+    st.title("💬 Chat with Leph")
+
+    # Display chat history
+    for role, text in st.session_state.chat_history:
+        if role == "user":
+            st.markdown(f"**You:** {text}")
+        else:
+            st.markdown(f"**Leph:** {text}")
+
+    user_input = st.text_input("Say something…")
+
+    if st.button("Send"):
+        if user_input.strip():
+            st.session_state.chat_history.append(("user", user_input))
+
+            ai_reply = gemini_response(user_input)
+            st.session_state.chat_history.append(("assistant", ai_reply))
+
+    st.button("Restart", on_click=restart)
