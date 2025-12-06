@@ -1,0 +1,3 @@
+.env
+__pycache__/
+API_KEY = "AIzaSyCZ0uHjfl5uN6g4w3gjHsKGuMzM6wZnOLU"
