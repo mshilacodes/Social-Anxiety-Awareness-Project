@@ -1,15 +1,24 @@
 import streamlit as st
-from google import genai
-from google.genai import types
+from google.genai import Client
+from google.genai.types import GenerateContentConfig
+import os
 from functions import get_secret
 
 
 st.set_page_config(page_title = "Leph Anxiety Support")
 
+api_key = os.getenv("API_KEY")
+client = Client(api_key=api_key)
 
-api_key = get_secret("API_KEY")
-client = genai.Client(api_key=api_key)
-
+def gemini_response(prompt):
+    response = client.models.generate_content(
+        model = "gemini-2.0-flash",
+        config=GenerateContentConfig(
+            max_output_tokens=500,
+        ),
+        contents=prompt
+    )
+    return response.text
 
 
 if "chat_history" not in st.session_state:
@@ -27,9 +36,9 @@ if "current_question_index" not in st.session_state:
 #Anxiety Questions
 ANXIETY_QUESTIONS =[
 "In the past week, how often have you felt nervous or on the edge? (0=never, 3=nearly everyday)",
-"How often have you been unable to stop or control worrying? (0-3)"
-"How often have you been restless? (0-3)"
-"How often have you felt easily irritated or annoyed? (0-3)"
+"How often have you been unable to stop or control worrying? (0-3)",
+"How often have you been restless? (0-3)",
+"How often have you felt easily irritated or annoyed? (0-3)",
 "How often have you felt afraid that something awful might happen? (0-3)"
 ]
 #Auto Intro 
@@ -54,7 +63,7 @@ if user_message:
     st.chat_message("user").write(user_message)
     st.session_state.chat_history.append(("user", user_message))
 
-    if st.session_state == "anxiety scale":
+    if st.session_state.mode == "anxiety scale":
         try: 
             scale_value = int(user_message)
             if 1 <= scale_value <= 10:
@@ -66,7 +75,7 @@ if user_message:
                         f"{ANXIETY_QUESTIONS[0]}"
                         
                      ))
-                    st.session_stat.mode = "chat"
+                    st.session_state.mode = "chat"
                 else:
                     st.session.chat_history.append(("assistant"
                     "I'm glad you're feeling ok today! "
@@ -134,7 +143,10 @@ if user_message:
             {"role": "user","parts":[{"text": full_input}]}
         ]
 
-        response = client.genrate_content(context)
+        response = client.models.genrate_content(context
+            model = "gemini-2.0-flash"
+            context = full_input                                        
+        )
         assistant_reply = response.text
 
         st.chat_message("assistant").write(assistant_reply)
