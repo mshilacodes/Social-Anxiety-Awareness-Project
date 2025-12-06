@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import google.genai as genai
 from google.genai.types import GenerateContentConfig
 import os
 from functions import get_secret
@@ -7,8 +7,8 @@ from functions import get_secret
 
 st.set_page_config(page_title = "Leph Anxiety Support")
 
-api_key = os.getenv("API_KEY")
-client = Client(api_key=api_key)
+api_key = get_secret("API_KEY")
+client = genai.Client(api_key=api_key)
 
 def gemini_response(prompt):
     response = client.models.generate_content(
@@ -63,7 +63,7 @@ if user_message:
     st.chat_message("user").write(user_message)
     st.session_state.chat_history.append(("user", user_message))
 
-    if st.session_state.mode == "anxiety scale":
+    if st.session_state.mode == "anxiety_scale":
         try: 
             scale_value = int(user_message)
             if 1 <= scale_value <= 10:
@@ -77,7 +77,7 @@ if user_message:
                      ))
                     st.session_state.mode = "chat"
                 else:
-                    st.session.chat_history.append(("assistant"
+                    st.session_state.chat_history.append(("assistant"
                     "I'm glad you're feeling ok today! "
                     "If you want to talk about anything or ask for support, I'm here"
                     
@@ -144,9 +144,9 @@ if user_message:
         ]
 
 
-        response = client.models.genrate_content(
+        response = client.models.generate_content(
             model="gemini-2.0-flash",
-            conents=full_input
+            contents=full_input
         )
 
        
