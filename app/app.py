@@ -143,10 +143,15 @@ if user_message:
             {"role": "user","parts":[{"text": full_input}]}
         ]
 
-        response = client.models.genrate_content(context
-            model = "gemini-2.0-flash"
-            context = full_input                                        
+
+        response = client.models.genrate_content(
+            model="gemini-2.0-flash",
+            conents=full_input
         )
+
+       
+
+
         assistant_reply = response.text
 
         st.chat_message("assistant").write(assistant_reply)
