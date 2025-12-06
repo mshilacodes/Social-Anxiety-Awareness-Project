@@ -1,3 +1,4 @@
-streamlit
-google-generativeai
-python-dotenv
+streamlit == 
+google-generativeai == 
+python-dotenv ==
+
