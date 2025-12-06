@@ -123,7 +123,7 @@ if user_message:
         But if symptons are mild suggest activites user can do
         """
         
-        full_input = f"{system_prompt}\n\nUser message:\n\"\"\"{user_message}\"\"\"
+        full_input = f"{system_prompt}\n\nUser message: \n\"\"\"{user_message}\"\"\""
 
         context = [
             *[
