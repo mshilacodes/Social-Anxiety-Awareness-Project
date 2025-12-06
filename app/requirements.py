@@ -1,4 +1,5 @@
 streamlit
+google
 google-genai
 python-dotenv
 
