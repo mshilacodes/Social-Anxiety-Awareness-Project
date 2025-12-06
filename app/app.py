@@ -6,9 +6,10 @@ from functions import get_secret
 
 st.set_page_config(page_title = "Leph Anxiety Support")
 
+
 api_key = get_secret("API_KEY")
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-2.0-flash-lite")
+client = genai.Client(api_key=api_key)
+
 
 
 if "chat_history" not in st.session_state:
@@ -133,7 +134,7 @@ if user_message:
             {"role": "user","parts":[{"text": full_input}]}
         ]
 
-        response = model.genrate_content(context)
+        response = client.genrate_content(context)
         assistant_reply = response.text
 
         st.chat_message("assistant").write(assistant_reply)
