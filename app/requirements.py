@@ -1,5 +1,5 @@
-streamlit == 1.51
+streamlit
 google-generativeai
-python-dotenv == 1.2.1
+python-dotenv
 
 
